@@ -6,11 +6,11 @@ function validatePassword(req, res, next) {
   
   if (!password) {
     return res.status(BAD_REQUEST_STATUS)
-      .json({ message: 'O campo \'password\' é obrigatório' });
+      .json({ message: 'O campo "password" é obrigatório' });
   }
   if (password.length < LENGTH_PASS_MIN) {
     return res.status(BAD_REQUEST_STATUS)
-      .json({ message: 'O \'password\' deve ter pelo menos 6 caracteres' });
+      .json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
   }
   next();
 }
