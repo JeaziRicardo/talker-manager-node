@@ -8,21 +8,39 @@ const validateToken = require('../middlewares/validateToken');
 const validateWatchedAt = require('../middlewares/validateWatchedAt');
 
 const talkerRoute = express.Router();
+const TALKER_JSON = './talker.json';
 const HTTP_OK_STATUS = 200;
 const CREATED_STATUS = 201;
 const NOT_FOUND_STATUS = 404;
 
 talkerRoute.get('/', async (_req, res) => {
-  const talkersJson = await fs.readFile('./talker.json');
+  const talkersJson = await fs.readFile(TALKER_JSON);
   const talkers = JSON.parse(talkersJson);
   
   res.status(HTTP_OK_STATUS).json(talkers);
 });
 
+talkerRoute.post('/',
+  validateToken, validateName, validateAge,
+  validateTalk, validateWatchedAt, validateRate,
+  async (req, res) => {
+  const talkersJson = await fs.readFile(TALKER_JSON);
+  const talkers = JSON.parse(talkersJson);
+
+  const id = talkers.length + 1;
+  const talker = { id, ...req.body };
+  talkers.push(talker);
+  const talkersString = JSON.stringify(talkers);
+
+  await fs.writeFile(TALKER_JSON, talkersString);
+
+  res.status(CREATED_STATUS).json(talker);
+});
+
 talkerRoute.get('/:id', async (req, res) => {
   const { id } = req.params;
 
-  const talkersJson = await fs.readFile('./talker.json');
+  const talkersJson = await fs.readFile(TALKER_JSON);
   const talkers = JSON.parse(talkersJson);
 
   const talker = talkers.find((t) => t.id === +id);
@@ -32,23 +50,6 @@ talkerRoute.get('/:id', async (req, res) => {
   }
 
   res.status(HTTP_OK_STATUS).json(talker);
-});
-
-talkerRoute.post('/',
-  validateToken, validateName, validateAge,
-  validateTalk, validateWatchedAt, validateRate,
-  async (req, res) => {
-  const talkersJson = await fs.readFile('./talker.json');
-  const talkers = JSON.parse(talkersJson);
-
-  const id = talkers.length + 1;
-  const talker = { id, ...req.body };
-  talkers.push(talker);
-  const talkersString = JSON.stringify(talkers);
-
-  await fs.writeFile('./talker.json', talkersString);
-
-  res.status(CREATED_STATUS).json(talker);
 });
 
 module.exports = talkerRoute;
