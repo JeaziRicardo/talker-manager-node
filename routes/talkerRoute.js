@@ -52,4 +52,27 @@ talkerRoute.get('/:id', async (req, res) => {
   res.status(HTTP_OK_STATUS).json(talker);
 });
 
+talkerRoute.put('/:id',
+  validateToken, validateName, validateAge,
+  validateTalk, validateWatchedAt, validateRate,
+  async (req, res) => {
+  const { id } = req.params;
+
+  const talkersJson = await fs.readFile(TALKER_JSON, 'utf8');
+  const talkers = JSON.parse(talkersJson);
+  const talker = talkers.map((t) => {
+    if (t.id === +id) {
+      return { ...t, ...req.body };
+    }
+    return t;
+  });
+  
+  const talkersString = JSON.stringify(talker);
+  await fs.writeFile(TALKER_JSON, talkersString);
+
+  const editTalker = talker.find((t) => t.id === +id);
+  
+  res.status(HTTP_OK_STATUS).json(editTalker);
+});
+
 module.exports = talkerRoute;
