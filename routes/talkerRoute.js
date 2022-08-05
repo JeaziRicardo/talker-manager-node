@@ -38,6 +38,19 @@ talkerRoute.post('/',
   res.status(CREATED_STATUS).json(talker);
 });
 
+talkerRoute.get('/search',
+  validateToken,
+  async (req, res) => {
+  const { q } = req.query;
+
+  const talkersJson = await fs.readFile(TALKER_JSON, 'utf8');
+  const talkers = JSON.parse(talkersJson);
+
+  const filteredTalkers = talkers.filter((t) => t.name.includes(q));
+
+  res.status(HTTP_OK_STATUS).json(filteredTalkers);
+});
+
 talkerRoute.get('/:id', async (req, res) => {
   const { id } = req.params;
 
