@@ -11,6 +11,7 @@ const talkerRoute = express.Router();
 const TALKER_JSON = './talker.json';
 const HTTP_OK_STATUS = 200;
 const CREATED_STATUS = 201;
+const NO_CONTENT_STATUS = 204;
 const NOT_FOUND_STATUS = 404;
 
 talkerRoute.get('/', async (_req, res) => {
@@ -73,6 +74,22 @@ talkerRoute.put('/:id',
   const editTalker = talker.find((t) => t.id === +id);
   
   res.status(HTTP_OK_STATUS).json(editTalker);
+});
+
+talkerRoute.delete('/:id',
+  validateToken,
+  async (req, res) => {
+  const { id } = req.params;
+
+  const talkersJson = await fs.readFile(TALKER_JSON, 'utf8');
+  const talkers = JSON.parse(talkersJson);
+
+  const removeTalker = talkers.filter((t) => t.id !== +id);
+
+  const talkersString = JSON.stringify(removeTalker);
+  await fs.writeFile(TALKER_JSON, talkersString);
+
+  res.status(NO_CONTENT_STATUS).end();
 });
 
 module.exports = talkerRoute;
